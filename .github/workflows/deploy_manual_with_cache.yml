@@ -1,0 +1,44 @@
+name: Deploy (Manual; Cache Composer)
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_env:
+        description: 'Deploy Environment'
+        required: true
+        default: 'stag'
+
+jobs:
+  deploy:
+    name: Deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Deploy
+        uses: deployphp/action@master
+        with:
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          known-hosts: ${{ secrets.KNOWN_HOSTS }}
+          dep: deploy ${{ github.event.inputs.deploy_env }} -v

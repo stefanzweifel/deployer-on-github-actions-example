@@ -1,0 +1,43 @@
+import:
+    - recipe/laravel.php
+    - contrib/php-fpm.php
+    - contrib/npm.php
+
+config:
+  application: 'deployer-on-github-actions-example'
+  repository: 'git@github.com:stefanzweifel/deployer-on-github-actions-example.git'
+
+  remote_user: forge
+  base_deploy_path: '/home/forge'
+  keep_releases: 3
+  php_fpm_version: '8.0'
+
+hosts:
+  prod:
+    hostname: 'ip_of_prod_host'
+    deploy_path: '{{base_deploy_path}}/example.com'
+
+  stag:
+    hostname: 'ip_of_stage_host'
+    deploy_path: '{{base_deploy_path}}/stag.example.com'
+
+tasks:
+  deploy:
+    - deploy:prepare
+    - deploy:vendors
+    - artisan:storage:link
+    - artisan:view:cache
+    - artisan:config:cache
+    - artisan:route:cache
+    - artisan:view:cache
+    - artisan:migrate
+    - npm:install
+    - npm:run:prod
+    - deploy:publish
+    - php-fpm:reload
+  npm:run:prod:
+    script:
+      - 'cd {{release_or_current_path}} && npm run prod'
+
+after:
+  deploy:failed: deploy:unlock
