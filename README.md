@@ -2,7 +2,7 @@
 
 This repository holds example workflows to showcase how you can use and run [deployer](https://deployer.org/). 
 
-To learn more about how to use these workflows read the accompanianing [blog post](https://stefanzweifel.io/posts/2021/05/24/deployer-on-github-actions).
+To learn more about how to use these workflows read the accompanianing [blog post](https://stefanzweifel.dev/posts/2021/05/24/deployer-on-github-actions).
 
 ## Bookmarks
 
